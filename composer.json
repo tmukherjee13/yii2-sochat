@@ -1,0 +1,22 @@
+{
+  "name": "tmukherjee13/yii2-sochat",
+  "description": "A realtime chat application written in PHP using websockets.",
+  "type": "yii2-extension",
+  "keywords": ["yii2", "extension", "chat", "socket", "php"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Tarun M",
+      "email": "tmukherjee13@gmail.com"
+        }
+    ],
+  "require": {
+    "yiisoft/yii2": "~2.0.0",
+    "cboden/ratchet": "^0.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sochat\\": "src"
+    }
+  }
+}
