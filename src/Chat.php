@@ -33,34 +33,49 @@ class Chat implements MessageComponentInterface
         echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
             , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
 
-        $data    = (array) json_decode($msg);
-        // $msgData = $this->insertMessage($data);
+        $data  = (array) json_decode($msg);
+        $cData = [
+            'Message' => [
+                'sender_id'   => $data['from'],
+                'receiver_id' => $data['to'],
+                'message'     => $data['text'],
+            ],
+        ];
+        $msgData = $this->insertMessage($cData);
 
-        // if (isset($msgData['id'])) {
+        if (isset($msgData['id'])) {
 
-        //     $return = [
-        //         "id"        => $msgData['id'],
-        //         "from_user" => $msgData['from_user'],
-        //         "to_user"   => $msgData['to_user'],
-        //         "message"   => $msgData['message'],
-        //         "username"  => $msgData['username'],
-        //         "sent"      => strtotime($msgData['created_at']),
-        //     ];
+            $return = [
+                "id"         => $msgData['id'],
+                "from"       => $msgData['from'],
+                "to"         => $msgData['to'],
+                "text"       => $msgData['message'],
+                "username"   => $msgData['username'],
+                "first_name" => $msgData['first_name'],
+                "last_name"  => $msgData['last_name'],
+                "sent"       => $msgData['created_at'],
+                "error"      => 0,
+            ];
 
-            foreach ($this->clients as $client) {
-                // if ($from !== $client) {
-                // The sender is not the receiver, send to each client connected
-                $client->send(json_encode($data));
-                // }
+            $this->dispatch($from, null, $return);
+
+        } else {
+            $this->dispatch($from, null, ['error' => 1, 'msg' => 'Unable to send message. Please try after some time.']);
+        }
+    }
+
+    public function dispatch(ConnectionInterface $from, $to = null, $data)
+    {
+        foreach ($this->clients as $client) {
+            if ($from !== $client) {
+                $client->send(json_encode($return));
             }
-        // }
+        }
     }
 
     public function onClose(ConnectionInterface $conn)
     {
-        // The connection is closed, remove it, as we can no longer send it messages
         $this->clients->detach($conn);
-
         echo "Connection {$conn->resourceId} has disconnected\n";
     }
 
@@ -72,8 +87,6 @@ class Chat implements MessageComponentInterface
 
     public function guid($opt = true)
     {
-        //  Set to true/false as your default way to do this.
-
         if (function_exists('com_create_guid')) {
             if ($opt) {return com_create_guid();} else {return trim(com_create_guid(), '{}');}
         } else {
