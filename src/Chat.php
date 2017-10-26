@@ -46,29 +46,36 @@ class Chat implements MessageComponentInterface
         if (isset($msgData['id'])) {
 
             $return = [
-                "id"         => $msgData['id'],
-                "from"       => $msgData['from'],
-                "to"         => $msgData['to'],
-                "text"       => $msgData['message'],
-                "username"   => $msgData['username'],
-                "first_name" => $msgData['first_name'],
-                "last_name"  => $msgData['last_name'],
-                "sent"       => $msgData['created_at'],
-                "error"      => 0,
+                "id"              => $msgData['id'],
+                "from"            => $msgData['from'],
+                "to"              => $msgData['to'],
+                "text"            => $msgData['message'],
+                "username"        => $msgData['username'],
+                "first_name"      => $msgData['first_name'],
+                "last_name"       => $msgData['last_name'],
+                "user_type"       => $msgData['userType'],
+                "profile_picture" => $msgData['profile_picture'],
+                "sent"            => $msgData['created_at'],
+                "error"           => 0,
             ];
 
             $this->dispatch($from, null, $return);
 
         } else {
-            $this->dispatch($from, null, ['error' => 1, 'msg' => 'Unable to send message. Please try after some time.']);
+            $this->dispatch($from, $from, ['error' => 1, 'msg' => 'Unable to send message. Please try after some time.']);
         }
     }
 
     public function dispatch(ConnectionInterface $from, $to = null, $data)
     {
-        foreach ($this->clients as $client) {
-            if ($from !== $client) {
-                $client->send(json_encode($return));
+
+        if (null !== $to) {
+            $to->send(json_encode($data));
+        } else {
+            foreach ($this->clients as $client) {
+                if ($from !== $client) {
+                    $client->send(json_encode($data));
+                }
             }
         }
     }
