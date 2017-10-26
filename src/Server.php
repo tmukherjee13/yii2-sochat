@@ -10,6 +10,12 @@ use Ratchet\WebSocket\WsServer;
  */
 class Server
 {
+    public $port;
+
+    public function __construct($port = 8080)
+    {
+        $this->port = $port;
+    }
     public function serveForever()
     {
         $server = IoServer::factory(
@@ -18,12 +24,12 @@ class Server
                     new Chat()
                 )
             ),
-            8080
+            $this->port
         );
 
         print("Starting chat server...");
         echo PHP_EOL;
-        print("Chat server running on port 8080");
+        print("Chat server running on port ".$this->port);
         echo PHP_EOL;
         $server->run();
     }
